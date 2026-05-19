@@ -309,10 +309,10 @@ class ArOverlayView @JvmOverloads constructor(
         val lineLen = dp(70f)
         val tail = if (turnRight) cx - lineLen else cx + lineLen
 
-        // Gradient: transparent at tail, green at head (cx)
+        // Gradient: transparent at tail, red at head (cx)
         sweepGradPaint.shader = LinearGradient(
             tail, cy, cx, cy,
-            Color.TRANSPARENT, Color.parseColor("#22c55e"),
+            Color.TRANSPARENT, Color.parseColor("#EF4444"),
             Shader.TileMode.CLAMP
         )
         canvas.drawLine(tail, cy, cx, cy, sweepGradPaint)
@@ -321,31 +321,29 @@ class ArOverlayView @JvmOverloads constructor(
         val hLen = dp(20f)
         val arrowPath = Path()
         if (turnRight) {
-            // cx is right side, arms go left-back → > shape
             arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx - hLen, cy - hLen * 0.7f)
             arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx - hLen, cy + hLen * 0.7f)
         } else {
-            // cx is left side, arms go right-back → < shape
             arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx + hLen, cy - hLen * 0.7f)
             arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx + hLen, cy + hLen * 0.7f)
         }
         val headP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; strokeWidth = dp(10f)
             strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-            color = Color.parseColor("#22c55e")
+            color = Color.parseColor("#EF4444")
         }
         canvas.drawPath(arrowPath, headP)
 
         // Chip label
         val label = if (turnRight) "Turn right →  $degrees°" else "←  Turn left  $degrees°"
         sweepTextPaint.textSize = dp(13f)
-        sweepTextPaint.color = Color.parseColor("#86EFAC")
+        sweepTextPaint.color = Color.parseColor("#FCA5A5")
         val chipW = sweepTextPaint.measureText(label) + dp(28f)
         val chipH = dp(34f)
         val chipY = cy + dp(46f)
         val chipRect = RectF(cx - chipW / 2, chipY - chipH / 2, cx + chipW / 2, chipY + chipH / 2)
-        sweepChipFill.color = Color.parseColor("#2E22c55e")
-        sweepChipStroke.color = Color.parseColor("#6622c55e")
+        sweepChipFill.color = Color.parseColor("#2EEF4444")
+        sweepChipStroke.color = Color.parseColor("#66EF4444")
         canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipFill)
         canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipStroke)
         canvas.drawText(label, cx, chipY + sweepTextPaint.textSize * 0.35f, sweepTextPaint)
@@ -395,14 +393,14 @@ class ArOverlayView @JvmOverloads constructor(
         if (rightSide) {
             edgeGlowPaint.shader = LinearGradient(
                 w - glowW, 0f, w, 0f,
-                Color.TRANSPARENT, Color.parseColor("#7F22c55e"),
+                Color.TRANSPARENT, Color.parseColor("#7FEF4444"),
                 Shader.TileMode.CLAMP
             )
             canvas.drawRect(w - glowW, h * 0.3f, w, h * 0.7f, edgeGlowPaint)
         } else {
             edgeGlowPaint.shader = LinearGradient(
                 glowW, 0f, 0f, 0f,
-                Color.TRANSPARENT, Color.parseColor("#7F22c55e"),
+                Color.TRANSPARENT, Color.parseColor("#7FEF4444"),
                 Shader.TileMode.CLAMP
             )
             canvas.drawRect(0f, h * 0.3f, glowW, h * 0.7f, edgeGlowPaint)
