@@ -226,7 +226,7 @@ class ArOverlayView @JvmOverloads constructor(
 
     private fun drawCompassNeedle(canvas: Canvas, cx: Float, cy: Float) {
         val r = dp(72f)
-        val color = needleColor
+        val nc = needleColor
 
         // Background disk
         val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -262,7 +262,7 @@ class ArOverlayView @JvmOverloads constructor(
 
         val needlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; strokeWidth = dp(4f)
-            strokeCap = Paint.Cap.ROUND; this.color = color
+            strokeCap = Paint.Cap.ROUND; color = nc
         }
         canvas.drawLine(cx, cy + tailLen, cx, cy - needleLen, needlePaint)
 
@@ -273,13 +273,13 @@ class ArOverlayView @JvmOverloads constructor(
         headPath.lineTo(cx + dp(9f), tipY + dp(16f))
         val headPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; strokeWidth = dp(4f)
-            strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; this.color = color
+            strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; color = nc
         }
         canvas.drawPath(headPath, headPaint)
 
         val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
-            this.color = Color.argb(120, Color.red(color), Color.green(color), Color.blue(color))
+            color = Color.argb(120, Color.red(nc), Color.green(nc), Color.blue(nc))
         }
         canvas.drawCircle(cx, cy + tailLen, dp(4f), dotPaint)
 
