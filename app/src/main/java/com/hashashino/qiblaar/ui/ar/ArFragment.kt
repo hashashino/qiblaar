@@ -51,6 +51,7 @@ class ArFragment : Fragment() {
     private var distanceKm = 0.0
     private var lockTimestampMs = 0L
     private var lockAgeJob: Job? = null
+    private var cameraVisible = true
 
     private val vibrator: Vibrator? by lazy {
         requireContext().getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
@@ -108,12 +109,11 @@ class ArFragment : Fragment() {
         super.onResume()
         orientationManager.start()
         val shared = QiblaLockHolder.state.value
-        if (shared.isLocked && shared.lockSource != null) {
+        // Only restore a lock that was saved from AR (UPRIGHT) pose — locks from compass stay in compass.
+        if (shared.isLocked && shared.lockedPose == DevicePose.UPRIGHT && shared.lockSource != null) {
             lockTimestampMs = shared.lockTimestampMs
             if (!orientationManager.isLocked) {
-                val savedGyro = if (shared.lockedPose == orientationManager.pose)
-                    shared.lockedGameAzimuth else null
-                orientationManager.lockWhenReady(shared.lockedBearing, savedGyro, shared.lockSource)
+                orientationManager.lockWhenReady(shared.lockedBearing, shared.lockedGameAzimuth, shared.lockSource)
             }
             startLockAgeTimer()
         }
@@ -292,6 +292,12 @@ class ArFragment : Fragment() {
         binding.btnCalibrateHeader.setOnClickListener {
             requireActivity().findViewById<BottomNavigationView>(R.id.bottom_nav)
                 ?.selectedItemId = R.id.calibrationFragment
+        }
+
+        binding.btnToggleCamera.setOnClickListener {
+            cameraVisible = !cameraVisible
+            binding.previewView.visibility = if (cameraVisible) View.VISIBLE else View.INVISIBLE
+            binding.btnToggleCamera.alpha = if (cameraVisible) 1f else 0.4f
         }
 
         binding.btnUseCompassMode.setOnClickListener {

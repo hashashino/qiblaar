@@ -43,9 +43,11 @@ class CompassFragment : Fragment() {
     private var lockTimestampMs = 0L
     private var lockAgeJob: Job? = null
 
-    // Use locked bearing when any lock is active (even cross-pose); fall back to GPS.
     private val activeBearing: Float
-        get() = if (QiblaLockHolder.state.value.isLocked) QiblaLockHolder.state.value.lockedBearing else gpsBearing
+        get() {
+            val shared = QiblaLockHolder.state.value
+            return if (shared.isLocked && shared.lockedPose == DevicePose.FLAT) shared.lockedBearing else gpsBearing
+        }
 
     // ── Priority-ordered UI state ─────────────────────────────────────────────
 
@@ -116,17 +118,11 @@ class CompassFragment : Fragment() {
         super.onResume()
         orientationManager.start()
         val shared = QiblaLockHolder.state.value
-        if (shared.isLocked && shared.lockSource != null) {
+        // Only restore a lock that was saved from compass (FLAT) pose — locks from AR stay in AR.
+        if (shared.isLocked && shared.lockedPose == DevicePose.FLAT && shared.lockSource != null) {
             lockTimestampMs = shared.lockTimestampMs
             if (!orientationManager.isLocked) {
-                val isSamePose = shared.lockedPose == orientationManager.pose
-                if (isSamePose) {
-                    // Restore gyro lock with the saved baseline so rotation tracking is continuous.
-                    orientationManager.lockWhenReady(shared.lockedBearing, shared.lockedGameAzimuth, shared.lockSource!!)
-                }
-                // Cross-pose (locked in AR, now in compass): skip gyro lock entirely.
-                // The compass OrientationManager will use the real magnetometer for azimuth;
-                // activeBearing returns lockedBearing to keep the Qibla needle correct.
+                orientationManager.lockWhenReady(shared.lockedBearing, shared.lockedGameAzimuth, shared.lockSource!!)
             }
             startLockAgeTimer()
         }
@@ -182,16 +178,13 @@ class CompassFragment : Fragment() {
             )
         }
 
-        // Locked check comes before GPS: a saved bearing works without live GPS.
-        // isCrossPoseLocked: holder says locked but OrientationManager is free (cross-pose).
-        val isCrossPoseLocked = shared.isLocked && !orientation.isLocked && shared.lockSource != null
-        if ((orientation.isLocked && orientation.lockSource != null) || isCrossPoseLocked) {
+        // Locked state: only shown when this pose's own lock is active.
+        if (orientation.isLocked && orientation.lockSource != null) {
             val ageMin = ((System.currentTimeMillis() - lockTimestampMs) / 60_000).toInt()
-            val lockSrc = orientation.lockSource ?: shared.lockSource!!
             return UiState.Locked(
-                bearing = shared.lockedBearing,  // always the GPS-derived Qibla direction
+                bearing = shared.lockedBearing,
                 distKm = distanceKm,
-                lockSource = lockSrc,
+                lockSource = orientation.lockSource,
                 lockAgeMin = ageMin,
                 accuracy = orientation.accuracy,
                 microTesla = orientation.magneticFieldMicroTesla,

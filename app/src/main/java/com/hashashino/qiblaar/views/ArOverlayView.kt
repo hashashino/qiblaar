@@ -258,6 +258,25 @@ class ArOverlayView @JvmOverloads constructor(
         val doorRect = RectF(cx - dw, cy + kh - dh, cx + dw, cy + kh)
         canvas.drawRoundRect(doorRect, dp(2f), dp(2f), doorFillP)
         canvas.drawRoundRect(doorRect, dp(2f), dp(2f), doorStrokeP)
+
+        // Aligned chevron — large downward-pointing V above the brackets
+        if (aligned) {
+            val chevApexY = cy - bracketR - dp(10f)
+            val chevBaseY  = chevApexY - dp(26f)
+            val chevHalfW  = dp(30f)
+            val chevPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                style = Paint.Style.STROKE
+                strokeWidth = dp(7f)
+                strokeCap = Paint.Cap.ROUND
+                strokeJoin = Paint.Join.ROUND
+                color = Color.parseColor("#22c55e")
+            }
+            val chevPath = Path()
+            chevPath.moveTo(cx - chevHalfW, chevBaseY)
+            chevPath.lineTo(cx, chevApexY)
+            chevPath.lineTo(cx + chevHalfW, chevBaseY)
+            canvas.drawPath(chevPath, chevPaint)
+        }
     }
 
     private fun drawDistancePill(canvas: Canvas, cx: Float, y: Float, aligned: Boolean) {
