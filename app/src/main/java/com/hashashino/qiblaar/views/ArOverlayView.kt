@@ -303,50 +303,58 @@ class ArOverlayView @JvmOverloads constructor(
     }
 
     private fun drawSweepArrow(canvas: Canvas, w: Float, h: Float, turnRight: Boolean, degrees: Int) {
-        // cx is on the prominent side; the line tail extends inward, head is always at cx
-        val cx = if (turnRight) w - dp(24f) - dp(60f) else dp(24f) + dp(60f)
-        val cy = h * 0.42f
-        val lineLen = dp(70f)
-        val tail = if (turnRight) cx - lineLen else cx + lineLen
+        // Map angle (5°–150°) to horizontal position: small angle → near center, large → near edge
+        val margin = dp(52f)
+        val maxOffset = w / 2f - margin
+        val fraction = (degrees.coerceIn(5, 150) / 150f)
+        val offset = fraction * maxOffset
+        val ax = if (turnRight) w / 2f + offset else w / 2f - offset
+        val ay = h * 0.42f
+        val red = Color.parseColor("#EF4444")
 
-        // Gradient: transparent at tail, red at head (cx)
+        // Fading trail from arrow position toward screen center
         sweepGradPaint.shader = LinearGradient(
-            tail, cy, cx, cy,
-            Color.TRANSPARENT, Color.parseColor("#EF4444"),
+            ax, ay, w / 2f, ay,
+            red, Color.TRANSPARENT,
             Shader.TileMode.CLAMP
         )
-        canvas.drawLine(tail, cy, cx, cy, sweepGradPaint)
+        canvas.drawLine(ax, ay, w / 2f, ay, sweepGradPaint)
 
-        // Arrow head at cx — arms go backward (toward tail) to form > or < chevron
-        val hLen = dp(20f)
+        // Chevron pointing toward center (< when on right, > when on left)
+        val hLen = dp(22f)
         val arrowPath = Path()
         if (turnRight) {
-            arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx - hLen, cy - hLen * 0.7f)
-            arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx - hLen, cy + hLen * 0.7f)
+            // on right side, tip points left toward center
+            arrowPath.moveTo(ax - hLen, ay - hLen * 0.7f)
+            arrowPath.lineTo(ax, ay)
+            arrowPath.lineTo(ax - hLen, ay + hLen * 0.7f)
         } else {
-            arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx + hLen, cy - hLen * 0.7f)
-            arrowPath.moveTo(cx, cy); arrowPath.lineTo(cx + hLen, cy + hLen * 0.7f)
+            // on left side, tip points right toward center
+            arrowPath.moveTo(ax + hLen, ay - hLen * 0.7f)
+            arrowPath.lineTo(ax, ay)
+            arrowPath.lineTo(ax + hLen, ay + hLen * 0.7f)
         }
         val headP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE; strokeWidth = dp(10f)
             strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-            color = Color.parseColor("#EF4444")
+            color = red
         }
         canvas.drawPath(arrowPath, headP)
 
-        // Chip label
+        // Chip — clamped so it never clips off screen edge
         val label = if (turnRight) "Turn right →  $degrees°" else "←  Turn left  $degrees°"
         sweepTextPaint.textSize = dp(13f)
         sweepTextPaint.color = Color.parseColor("#FCA5A5")
         val chipW = sweepTextPaint.measureText(label) + dp(28f)
         val chipH = dp(34f)
-        val chipY = cy + dp(46f)
-        val chipRect = RectF(cx - chipW / 2, chipY - chipH / 2, cx + chipW / 2, chipY + chipH / 2)
+        val chipY = ay + dp(50f)
+        val chipX = ax.coerceIn(chipW / 2f + dp(8f), w - chipW / 2f - dp(8f))
+        val chipRect = RectF(chipX - chipW / 2, chipY - chipH / 2, chipX + chipW / 2, chipY + chipH / 2)
         sweepChipFill.color = Color.parseColor("#2EEF4444")
         sweepChipStroke.color = Color.parseColor("#66EF4444")
         canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipFill)
         canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipStroke)
-        canvas.drawText(label, cx, chipY + sweepTextPaint.textSize * 0.35f, sweepTextPaint)
+        canvas.drawText(label, chipX, chipY + sweepTextPaint.textSize * 0.35f, sweepTextPaint)
     }
 
     private fun drawTurnAroundArrow(canvas: Canvas, w: Float, h: Float) {
