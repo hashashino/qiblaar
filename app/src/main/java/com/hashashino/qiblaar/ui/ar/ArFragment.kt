@@ -197,7 +197,7 @@ class ArFragment : Fragment() {
             d = ((d + 540) % 360) - 180
             d
         }
-        return if (abs(delta) > 5f) {
+        return if (abs(delta) > 2f) {
             UiState.Searching(gpsBearing, orientation.azimuthDegrees)
         } else {
             UiState.Aligned(gpsBearing, orientation.accuracy)

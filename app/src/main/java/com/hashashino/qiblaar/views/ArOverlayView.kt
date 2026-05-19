@@ -27,14 +27,12 @@ class ArOverlayView @JvmOverloads constructor(
     private var lastAlignedNotified = false
 
     private fun notifyAlignmentChange() {
-        val nowAligned = arState == ArState.ALIGNED
+        val nowAligned = isAligned
         if (nowAligned != lastAlignedNotified) {
             lastAlignedNotified = nowAligned
             onAlignmentChanged?.invoke(nowAligned)
         }
     }
-
-    private enum class ArState { ALIGNED, CLOSE, FAR, BEHIND }
 
     private val angleDiff: Float
         get() {
@@ -43,20 +41,10 @@ class ArOverlayView @JvmOverloads constructor(
             return d
         }
 
-    private val arState: ArState
-        get() = when {
-            abs(angleDiff) <= 5f  -> ArState.ALIGNED
-            abs(angleDiff) >= 150f -> ArState.BEHIND
-            abs(angleDiff) <= 30f -> ArState.CLOSE
-            else                  -> ArState.FAR
-        }
+    private val isAligned: Boolean get() = abs(angleDiff) <= 2f
 
-    private val stateColor: Int
-        get() = when (arState) {
-            ArState.ALIGNED           -> Color.parseColor("#22c55e")
-            ArState.CLOSE             -> Color.parseColor("#F59E0B")
-            ArState.FAR, ArState.BEHIND -> Color.parseColor("#EF4444")
-        }
+    private val needleColor: Int
+        get() = if (isAligned) Color.parseColor("#22c55e") else Color.parseColor("#EF4444")
 
     private val density = context.resources.displayMetrics.density
     private fun dp(v: Float) = v * density
@@ -112,16 +100,10 @@ class ArOverlayView @JvmOverloads constructor(
         val h = height.toFloat()
         val cx = w / 2f
         val cy = h / 2f
-        val color = stateColor
-
-        when (arState) {
-            ArState.ALIGNED -> {
-                drawKaabaMarker(canvas, cx, cy * 0.78f, color, aligned = true)
-                drawDistancePill(canvas, cx, cy * 0.78f + dp(100f), aligned = true)
-            }
-            else -> {
-                drawCompassNeedle(canvas, cx, cy * 0.78f)
-            }
+        // Always draw the compass needle — turns green when aligned
+        drawCompassNeedle(canvas, cx, cy * 0.78f)
+        if (isAligned) {
+            drawDistancePill(canvas, cx, cy * 0.78f + dp(110f), aligned = true)
         }
     }
 
@@ -244,7 +226,7 @@ class ArOverlayView @JvmOverloads constructor(
 
     private fun drawCompassNeedle(canvas: Canvas, cx: Float, cy: Float) {
         val r = dp(72f)
-        val red = Color.parseColor("#EF4444")
+        val color = needleColor
 
         // Background disk
         val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -271,52 +253,49 @@ class ArOverlayView @JvmOverloads constructor(
         }
         canvas.drawPath(fwdPath, fwdPaint)
 
-        // Rotating needle — points toward Qibla (up = aligned)
+        // Rotating needle — points toward Qibla (12 o'clock = aligned)
         canvas.save()
         canvas.rotate(angleDiff, cx, cy)
 
         val needleLen = r * 0.72f
         val tailLen   = r * 0.32f
 
-        // Needle body
         val needlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = dp(4f)
-            strokeCap = Paint.Cap.ROUND
-            color = red
+            style = Paint.Style.STROKE; strokeWidth = dp(4f)
+            strokeCap = Paint.Cap.ROUND; this.color = color
         }
         canvas.drawLine(cx, cy + tailLen, cx, cy - needleLen, needlePaint)
 
-        // Arrowhead at needle tip
         val tipY = cy - needleLen
         val headPath = Path()
         headPath.moveTo(cx - dp(9f), tipY + dp(16f))
         headPath.lineTo(cx, tipY)
         headPath.lineTo(cx + dp(9f), tipY + dp(16f))
         val headPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = dp(4f)
-            strokeCap = Paint.Cap.ROUND
-            strokeJoin = Paint.Join.ROUND
-            color = red
+            style = Paint.Style.STROKE; strokeWidth = dp(4f)
+            strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; this.color = color
         }
         canvas.drawPath(headPath, headPaint)
 
-        // Tail dot
         val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.FILL
-            color = Color.argb(120, 239, 68, 68)
+            this.color = Color.argb(120, Color.red(color), Color.green(color), Color.blue(color))
         }
         canvas.drawCircle(cx, cy + tailLen, dp(4f), dotPaint)
 
         canvas.restore()
 
-        // Degrees label below the disk
+        // Label below disk
         sweepTextPaint.textSize = dp(12f)
-        sweepTextPaint.color = Color.parseColor("#FCA5A5")
-        val deg = abs(angleDiff.toInt())
-        val dir = if (angleDiff > 0) "Turn right  $deg°" else "Turn left  $deg°"
-        canvas.drawText(dir, cx, cy + r + dp(22f), sweepTextPaint)
+        if (isAligned) {
+            sweepTextPaint.color = Color.parseColor("#86EFAC")
+            canvas.drawText("Facing Qibla", cx, cy + r + dp(22f), sweepTextPaint)
+        } else {
+            sweepTextPaint.color = Color.parseColor("#FCA5A5")
+            val deg = abs(angleDiff.toInt())
+            val dir = if (angleDiff > 0) "Turn right  $deg°" else "Turn left  $deg°"
+            canvas.drawText(dir, cx, cy + r + dp(22f), sweepTextPaint)
+        }
     }
 
     private fun drawDistancePill(canvas: Canvas, cx: Float, y: Float, aligned: Boolean) {
