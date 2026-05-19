@@ -262,7 +262,7 @@ class ArOverlayView @JvmOverloads constructor(
         // Aligned chevron — large downward-pointing V above the brackets
         if (aligned) {
             val chevApexY = cy - bracketR - dp(10f)
-            val chevBaseY  = chevApexY - dp(26f)
+            val chevBaseY  = chevApexY + dp(26f)
             val chevHalfW  = dp(30f)
             val chevPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.STROKE
