@@ -3,7 +3,6 @@ package com.hashashino.qiblaar.views
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RadialGradient
@@ -12,9 +11,6 @@ import android.graphics.Shader
 import android.util.AttributeSet
 import android.view.View
 import kotlin.math.abs
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
 
 class ArOverlayView @JvmOverloads constructor(
     context: Context,
@@ -88,30 +84,9 @@ class ArOverlayView @JvmOverloads constructor(
         strokeJoin = Paint.Join.ROUND
     }
 
-    // Sweep arrow (when off-axis)
-    private val sweepGradPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = dp(10f)
-        strokeCap = Paint.Cap.ROUND
-    }
-    private val sweepHeadPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = dp(10f)
-        strokeCap = Paint.Cap.ROUND
-        strokeJoin = Paint.Join.ROUND
-    }
-    private val sweepChipFill = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        color = Color.parseColor("#2E22c55e")
-    }
-    private val sweepChipStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.STROKE
-        strokeWidth = dp(1f)
-        color = Color.parseColor("#6622c55e")
-    }
+    // Label paint reused for compass needle text and chips
     private val sweepTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         textAlign = Paint.Align.CENTER
-        color = Color.parseColor("#86EFAC")
         isFakeBoldText = true
     }
 
@@ -127,9 +102,6 @@ class ArOverlayView @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
         isFakeBoldText = true
     }
-
-    // Edge glow strip (peripheral cue)
-    private val edgeGlowPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
     var distanceKm: Float = 6420f
         set(value) { field = value; invalidate() }
@@ -147,17 +119,8 @@ class ArOverlayView @JvmOverloads constructor(
                 drawKaabaMarker(canvas, cx, cy * 0.78f, color, aligned = true)
                 drawDistancePill(canvas, cx, cy * 0.78f + dp(100f), aligned = true)
             }
-            ArState.BEHIND -> {
-                drawTurnAroundArrow(canvas, w, h)
-                drawKaabaMarker(canvas, cx, cy * 0.78f, color, aligned = false, dim = true)
-            }
             else -> {
-                // Off-axis: sweep arrow on the correct side + edge glow strip
-                val turnRight = angleDiff > 0
-                drawSweepArrow(canvas, w, h, turnRight, abs(angleDiff).toInt())
-                drawEdgeGlow(canvas, w, h, turnRight)
-                // Kaaba marker dimly visible off-screen reference
-                drawKaabaMarker(canvas, cx, cy * 0.78f, color, aligned = false, dim = true)
+                drawCompassNeedle(canvas, cx, cy * 0.78f)
             }
         }
     }
@@ -279,6 +242,83 @@ class ArOverlayView @JvmOverloads constructor(
         }
     }
 
+    private fun drawCompassNeedle(canvas: Canvas, cx: Float, cy: Float) {
+        val r = dp(72f)
+        val red = Color.parseColor("#EF4444")
+
+        // Background disk
+        val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = Color.argb(180, 8, 10, 20)
+        }
+        val ringPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = dp(1.5f)
+            color = Color.argb(60, 255, 255, 255)
+        }
+        canvas.drawCircle(cx, cy, r, bgPaint)
+        canvas.drawCircle(cx, cy, r, ringPaint)
+
+        // Fixed forward marker at 12 o'clock (does not rotate) — small white triangle
+        val fwdPath = Path()
+        fwdPath.moveTo(cx, cy - r + dp(4f))
+        fwdPath.lineTo(cx - dp(5f), cy - r + dp(13f))
+        fwdPath.lineTo(cx + dp(5f), cy - r + dp(13f))
+        fwdPath.close()
+        val fwdPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = Color.argb(160, 255, 255, 255)
+        }
+        canvas.drawPath(fwdPath, fwdPaint)
+
+        // Rotating needle — points toward Qibla (up = aligned)
+        canvas.save()
+        canvas.rotate(angleDiff, cx, cy)
+
+        val needleLen = r * 0.72f
+        val tailLen   = r * 0.32f
+
+        // Needle body
+        val needlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = dp(4f)
+            strokeCap = Paint.Cap.ROUND
+            color = red
+        }
+        canvas.drawLine(cx, cy + tailLen, cx, cy - needleLen, needlePaint)
+
+        // Arrowhead at needle tip
+        val tipY = cy - needleLen
+        val headPath = Path()
+        headPath.moveTo(cx - dp(9f), tipY + dp(16f))
+        headPath.lineTo(cx, tipY)
+        headPath.lineTo(cx + dp(9f), tipY + dp(16f))
+        val headPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeWidth = dp(4f)
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+            color = red
+        }
+        canvas.drawPath(headPath, headPaint)
+
+        // Tail dot
+        val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            color = Color.argb(120, 239, 68, 68)
+        }
+        canvas.drawCircle(cx, cy + tailLen, dp(4f), dotPaint)
+
+        canvas.restore()
+
+        // Degrees label below the disk
+        sweepTextPaint.textSize = dp(12f)
+        sweepTextPaint.color = Color.parseColor("#FCA5A5")
+        val deg = abs(angleDiff.toInt())
+        val dir = if (angleDiff > 0) "Turn right  $deg°" else "Turn left  $deg°"
+        canvas.drawText(dir, cx, cy + r + dp(22f), sweepTextPaint)
+    }
+
     private fun drawDistancePill(canvas: Canvas, cx: Float, y: Float, aligned: Boolean) {
         val dist = "%.0f km".format(distanceKm)
         // Arabic + distance
@@ -300,142 +340,5 @@ class ArOverlayView @JvmOverloads constructor(
         canvas.drawRoundRect(rect, dp(999f), dp(999f), pillFill)
         canvas.drawRoundRect(rect, dp(999f), dp(999f), pillStroke)
         canvas.drawText(text, cx, y + pillTextPaint.textSize * 0.35f, pillTextPaint)
-    }
-
-    private fun drawSweepArrow(canvas: Canvas, w: Float, h: Float, turnRight: Boolean, degrees: Int) {
-        // Map angle (5°–150°) to horizontal position: small angle → near center, large → near edge
-        val margin = dp(52f)
-        val maxOffset = w / 2f - margin
-        val fraction = (degrees.coerceIn(5, 150) / 150f)
-        val offset = fraction * maxOffset
-        val ax = if (turnRight) w / 2f + offset else w / 2f - offset
-        val ay = h * 0.42f
-        val red = Color.parseColor("#EF4444")
-
-        // Fading trail from arrow position toward screen center
-        sweepGradPaint.shader = LinearGradient(
-            ax, ay, w / 2f, ay,
-            red, Color.TRANSPARENT,
-            Shader.TileMode.CLAMP
-        )
-        canvas.drawLine(ax, ay, w / 2f, ay, sweepGradPaint)
-
-        // Chevron pointing toward center (< when on right, > when on left)
-        val hLen = dp(22f)
-        val arrowPath = Path()
-        if (turnRight) {
-            // on right side, tip points left toward center
-            arrowPath.moveTo(ax - hLen, ay - hLen * 0.7f)
-            arrowPath.lineTo(ax, ay)
-            arrowPath.lineTo(ax - hLen, ay + hLen * 0.7f)
-        } else {
-            // on left side, tip points right toward center
-            arrowPath.moveTo(ax + hLen, ay - hLen * 0.7f)
-            arrowPath.lineTo(ax, ay)
-            arrowPath.lineTo(ax + hLen, ay + hLen * 0.7f)
-        }
-        val headP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = dp(10f)
-            strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND
-            color = red
-        }
-        canvas.drawPath(arrowPath, headP)
-
-        // Chip — clamped so it never clips off screen edge
-        val label = if (turnRight) "Turn right →  $degrees°" else "←  Turn left  $degrees°"
-        sweepTextPaint.textSize = dp(13f)
-        sweepTextPaint.color = Color.parseColor("#FCA5A5")
-        val chipW = sweepTextPaint.measureText(label) + dp(28f)
-        val chipH = dp(34f)
-        val chipY = ay + dp(50f)
-        val chipX = ax.coerceIn(chipW / 2f + dp(8f), w - chipW / 2f - dp(8f))
-        val chipRect = RectF(chipX - chipW / 2, chipY - chipH / 2, chipX + chipW / 2, chipY + chipH / 2)
-        sweepChipFill.color = Color.parseColor("#2EEF4444")
-        sweepChipStroke.color = Color.parseColor("#66EF4444")
-        canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipFill)
-        canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipStroke)
-        canvas.drawText(label, chipX, chipY + sweepTextPaint.textSize * 0.35f, sweepTextPaint)
-    }
-
-    private fun drawTurnAroundArrow(canvas: Canvas, w: Float, h: Float) {
-        val cx = w / 2f
-        val cy = h * 0.42f
-        val arcR = dp(50f)
-        val red = Color.parseColor("#EF4444")
-
-        // Top semicircle sweeping counterclockwise (0° → -180°) to show 180° rotation
-        val arcPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = dp(9f)
-            strokeCap = Paint.Cap.ROUND; color = red
-        }
-        canvas.drawArc(RectF(cx - arcR, cy - arcR, cx + arcR, cy + arcR), 0f, -180f, false, arcPaint)
-
-        // Arrowhead at arc terminus (left end), V-shape pointing downward
-        val headPath = Path()
-        headPath.moveTo(cx - arcR - dp(13f), cy - dp(13f))
-        headPath.lineTo(cx - arcR, cy)
-        headPath.lineTo(cx - arcR + dp(13f), cy - dp(13f))
-        val headP = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE; strokeWidth = dp(9f)
-            strokeCap = Paint.Cap.ROUND; strokeJoin = Paint.Join.ROUND; color = red
-        }
-        canvas.drawPath(headPath, headP)
-
-        // Chip
-        val label = "Turn around · 180°"
-        sweepTextPaint.textSize = dp(13f)
-        sweepTextPaint.color = Color.parseColor("#FCA5A5")
-        val chipW = sweepTextPaint.measureText(label) + dp(28f)
-        val chipH = dp(34f)
-        val chipY = cy + arcR + dp(20f)
-        val chipRect = RectF(cx - chipW / 2, chipY - chipH / 2, cx + chipW / 2, chipY + chipH / 2)
-        sweepChipFill.color = Color.parseColor("#2EEF4444")
-        sweepChipStroke.color = Color.parseColor("#66EF4444")
-        canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipFill)
-        canvas.drawRoundRect(chipRect, dp(999f), dp(999f), sweepChipStroke)
-        canvas.drawText(label, cx, chipY + sweepTextPaint.textSize * 0.35f, sweepTextPaint)
-    }
-
-    private fun drawEdgeGlow(canvas: Canvas, w: Float, h: Float, rightSide: Boolean) {
-        val glowW = dp(6f)
-        if (rightSide) {
-            edgeGlowPaint.shader = LinearGradient(
-                w - glowW, 0f, w, 0f,
-                Color.TRANSPARENT, Color.parseColor("#7FEF4444"),
-                Shader.TileMode.CLAMP
-            )
-            canvas.drawRect(w - glowW, h * 0.3f, w, h * 0.7f, edgeGlowPaint)
-        } else {
-            edgeGlowPaint.shader = LinearGradient(
-                glowW, 0f, 0f, 0f,
-                Color.TRANSPARENT, Color.parseColor("#7FEF4444"),
-                Shader.TileMode.CLAMP
-            )
-            canvas.drawRect(0f, h * 0.3f, glowW, h * 0.7f, edgeGlowPaint)
-        }
-    }
-
-    private fun drawArrow(canvas: Canvas, sx: Float, sy: Float, ex: Float, ey: Float) {
-        val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeWidth = dp(2.4f)
-            strokeCap = Paint.Cap.ROUND
-            color = Color.WHITE
-        }
-        canvas.drawLine(sx, sy, ex, ey, linePaint)
-        val angle = atan2((ey - sy).toDouble(), (ex - sx).toDouble())
-        val headLen = dp(11f)
-        val arrowPath = Path()
-        arrowPath.moveTo(ex, ey)
-        arrowPath.lineTo(
-            (ex - headLen * cos(angle - Math.PI / 6)).toFloat(),
-            (ey - headLen * sin(angle - Math.PI / 6)).toFloat()
-        )
-        arrowPath.moveTo(ex, ey)
-        arrowPath.lineTo(
-            (ex - headLen * cos(angle + Math.PI / 6)).toFloat(),
-            (ey - headLen * sin(angle + Math.PI / 6)).toFloat()
-        )
-        canvas.drawPath(arrowPath, linePaint)
     }
 }
