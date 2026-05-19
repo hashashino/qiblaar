@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/arFragment"
+        android:icon="@drawable/ic_camera"
+        android:title="@string/nav_ar" />
+    <item
+        android:id="@+id/compassFragment"
+        android:icon="@drawable/ic_compass"
+        android:title="@string/nav_compass" />
+    <item
+        android:id="@+id/calibrationFragment"
+        android:icon="@drawable/ic_calibrate"
+        android:title="@string/nav_calibrate" />
+</menu>

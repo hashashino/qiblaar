@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">QiblaAR</string>
+    <string name="nav_ar">AR View</string>
+    <string name="nav_compass">Compass</string>
+    <string name="nav_calibrate">Calibrate</string>
+
+    <!-- Generic -->
+    <string name="getting_location">Getting location…</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="done">Done</string>
+    <string name="permission_required">Camera and location permissions are required.</string>
+
+    <!-- Compass header -->
+    <string name="qibla_compass_eyebrow">Qibla Compass</string>
+    <string name="locating_label">Locating…</string>
+
+    <!-- Pose hints -->
+    <string name="pose_hint_flat_title">Lay phone flat</string>
+    <string name="pose_hint_flat_body">Place your phone face-up on a flat surface — like a table or floor — so the compass can read true heading.</string>
+    <string name="pose_hint_upright_title">Hold phone upright</string>
+    <string name="pose_hint_upright_body">Point the camera at the wall in front of you, like you\'re taking a portrait photo. The Qibla marker appears where the Kaaba lies through the wall.</string>
+    <string name="pose_hint_why">Why does this matter?</string>
+    <string name="pose_hint_use_compass">Use compass mode instead</string>
+
+    <!-- Finding location -->
+    <string name="finding_location_title">Finding your location</string>
+    <string name="finding_location_body">Step outside or near a window for a faster lock. Qibla bearing needs your exact position.</string>
+    <string name="use_preset_instead">Use pre-set direction instead</string>
+
+    <!-- Bearing -->
+    <string name="true_north_label">true north</string>
+    <string name="kaaba_distance_label">Kaaba · %1$s km away</string>
+    <string name="kaaba_arabic">ﺍﻟْﻜَﻌْﺒَﺔُ · %1$s km</string>
+
+    <!-- Interference -->
+    <string name="interference_mild_title">Nearby metal detected.</string>
+    <string name="interference_mild_body">Bearing may be off by ±%1$d°. Step away from devices, table legs, or rebar.</string>
+    <string name="interference_severe_title">Reading not trustworthy</string>
+    <string name="interference_severe_body">Magnetic field is %1$.0f µT — way above normal. You\'re likely near a speaker, laptop, MRI, or steel beam. Move 2 meters away and recalibrate.</string>
+    <string name="magnetic_field_label">Magnetic field</string>
+    <string name="magnetic_normal_range">(normal 25–65)</string>
+
+    <!-- Pre-set / lock flow (user-facing name is "pre-set", never "lock") -->
+    <string name="preset_direction">Pre-set direction</string>
+    <string name="save_direction">Save this direction</string>
+    <string name="use_live_compass">Use live compass</string>
+    <string name="re_anchor">Re-anchor</string>
+    <string name="preset_banner">Using your saved direction. GPS-free, immune to local interference.</string>
+    <string name="preset_location_label">Pre-set · Saved at home</string>
+
+    <!-- AR aligned -->
+    <string name="pointing_at_kaaba">Pointing at the Kaaba</string>
+    <string name="align_prayer_mat">Lay your prayer mat parallel to this line</string>
+    <string name="sweep_right">Slowly sweep the phone right →</string>
+    <string name="sweep_left">← Slowly sweep the phone left</string>
+    <string name="ar_gyro_caption">Marker tracks via gyroscope only</string>
+
+    <!-- AR interference -->
+    <string name="ar_marker_drifting">The AR marker is drifting</string>
+    <string name="ar_interference_body">We detected %1$.0f µT nearby — likely speakers, laptop, or a metal door frame. Don\'t trust this bearing.</string>
+    <string name="ar_interference_tip">Tip: Switch to your pre-set direction. Gyro-only tracking ignores magnetic noise.</string>
+    <string name="switch_to_preset">Switch to pre-set</string>
+
+    <!-- Pre-set flow -->
+    <string name="lock_step1_title">Save your Qibla\ndirection for later</string>
+    <string name="lock_step1_body">Pre-set the bearing while you have good GPS — then pray anywhere, even with no signal or magnetic interference.</string>
+    <string name="lock_step1_continue">Continue</string>
+    <string name="lock_step1_later">Maybe later</string>
+    <string name="lock_benefit_gps_title">Works without GPS</string>
+    <string name="lock_benefit_gps_body">Saved direction follows you via gyroscope only</string>
+    <string name="lock_benefit_metal_title">Immune to metal &amp; electronics</string>
+    <string name="lock_benefit_metal_body">The magnetic field at the prayer spot can\'t fool it</string>
+    <string name="lock_benefit_recall_title">Quick to recall</string>
+    <string name="lock_benefit_recall_body">Open the app and the Kaaba marker is already there</string>
+
+    <string name="lock_step2_header">STEP 2 OF 3</string>
+    <string name="lock_step2_title">How would you like\nto set it?</string>
+    <string name="lock_step2_subtitle">Pick the most accurate method available right now.</string>
+    <string name="lock_capture_title">Capture current direction</string>
+    <string name="lock_capture_subtitle">Uses your GPS + calibrated compass right now</string>
+    <string name="lock_capture_action">Lay phone flat &amp; tap to capture</string>
+    <string name="lock_manual_title">Set manually</string>
+    <string name="lock_manual_subtitle">Align with a prayer rug or mosque mihrab you know</string>
+    <string name="lock_gyro_info">Either way, the saved direction is anchored to the gyroscope — it follows you when you move, even in basements or steel buildings.</string>
+
+    <string name="lock_step3_title">Direction saved</string>
+    <string name="lock_step3_body">Your Qibla is anchored to the gyroscope. Tracks accurately even without GPS or compass.</string>
+    <string name="lock_step3_open_ar">Open in AR view</string>
+    <string name="lock_step3_back_compass">Back to compass</string>
+    <string name="saved_bearing_label">Saved bearing</string>
+    <string name="from_label">From</string>
+    <string name="distance_label">Distance to Kaaba</string>
+    <string name="captured_label">Captured</string>
+
+    <!-- Calibration -->
+    <string name="calibration_title">Trace a figure-8</string>
+    <string name="calibration_instructions">Hold your phone in front of you and draw a slow 8 through the air. The compass learns from how it tumbles.</string>
+    <string name="calibration_step_header">STEP 1 OF 2 · COMPASS</string>
+    <string name="calibration_progress_label">Strength medium</string>
+    <string name="calibration_tip_title">For best accuracy</string>
+    <string name="calibration_tip_metal">Move away from laptops, speakers, and metal furniture</string>
+    <string name="calibration_tip_twist">Twist the phone — not just slide it side to side</string>
+    <string name="calibration_tip_repeat">Repeat any time the compass jumps suddenly</string>
+    <string name="calibration_tip">Tip: Move away from metal objects and electronics for best accuracy.</string>
+
+    <!-- Accuracy chips -->
+    <string name="accuracy_high">±%1$d°</string>
+    <string name="accuracy_low">±%1$d°</string>
+    <string name="accuracy_unreliable">Inaccurate</string>
+    <string name="needs_calibration">Needs calibration</string>
+
+    <!-- Signal trio -->
+    <string name="signal_gps">GPS</string>
+    <string name="signal_compass">Compass</string>
+    <string name="signal_magnetic">Magnetic</string>
+    <string name="signal_ok">OK</string>
+
+    <!-- Recalibrate now -->
+    <string name="recalibrate_now">Recalibrate now</string>
+
+    <!-- Button states (internal — not user-facing) -->
+    <string name="hold_phone_upright">Hold phone upright</string>
+    <string name="hold_phone_level">Hold phone more level</string>
+    <string name="move_to_clean_spot">Move to clean spot first</string>
+    <string name="waiting_for_gps">Waiting for GPS…</string>
+    <string name="lock_qibla_direction">Pre-set direction</string>
+    <string name="unlock_direction">Unlock</string>
+    <string name="set_qibla_manually">Set Qibla manually (prayer rug) →</string>
+</resources>

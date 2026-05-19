@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Qibla AR — Pose & Accuracy UX</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  body { background: #07080F; overflow: hidden; }
+  /* Canvas background — dark grid like Figma */
+  #root { background:
+    radial-gradient(circle at 25% 20%, #1a1d3c 0%, transparent 50%),
+    radial-gradient(circle at 75% 80%, #0e1a2e 0%, transparent 50%),
+    #07080F;
+    width: 100vw; height: 100vh; overflow: hidden;
+  }
+  /* Override design-canvas dot grid for our dark theme */
+  .dc-canvas { background: transparent !important; }
+  .dc-section-title { color: rgba(255,255,255,0.9) !important; }
+  .dc-section-sub   { color: rgba(255,255,255,0.45) !important; }
+  .dc-artboard      {
+    background: transparent !important;
+  }
+  .dc-artboard-label { color: rgba(255,255,255,0.7) !important; }
+  .dc-artboard-meta  { color: rgba(255,255,255,0.4) !important; }
+  .dc-toolbar { background: rgba(20,21,42,0.8) !important; border-color: rgba(255,255,255,0.1) !important; backdrop-filter: blur(12px); }
+  .dc-toolbar button { color: rgba(255,255,255,0.7) !important; }
+  .dc-toolbar button:hover { background: rgba(255,255,255,0.06) !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="phone-frame.jsx"></script>
+<script type="text/babel" src="compass-disk.jsx"></script>
+<script type="text/babel" src="pose-illustrations.jsx"></script>
+<script type="text/babel" src="compass-screens.jsx"></script>
+<script type="text/babel" src="ar-screens.jsx"></script>
+<script type="text/babel" src="flow-screens.jsx"></script>
+
+<script type="text/babel">
+function App() {
+  const Frame = ({ children }) => (
+    <Phone>{children}</Phone>
+  );
+
+  return (
+    <DesignCanvas
+      title="Qibla AR · Pose & Accuracy UX"
+      subtitle="How the app guides users to hold the phone correctly, handle interference, and save a known-good direction. Click any frame to focus."
+    >
+      <DCSection id="compass-pose" title="Compass · Pose & getting started" subtitle="Phone-flat is essential — these states block or nudge until the user gets it right.">
+        <DCArtboard id="c-finding"    label="Finding location"          width={420} height={888}><Frame><CompassFindingLocation/></Frame></DCArtboard>
+        <DCArtboard id="c-pose"       label="Phone tilted (blocks)"     width={420} height={888}><Frame><CompassPoseHint/></Frame></DCArtboard>
+        <DCArtboard id="c-calibrate"  label="Compass uncalibrated"      width={420} height={888}><Frame><CompassCalibrating/></Frame></DCArtboard>
+        <DCArtboard id="c-ready"      label="Ready — accurate ±5°"      width={420} height={888}><Frame><CompassReady/></Frame></DCArtboard>
+      </DCSection>
+
+      <DCSection id="compass-interf" title="Compass · Interference & locked" subtitle="What the user sees when the magnetic field is unreliable, or they're relying on a saved direction.">
+        <DCArtboard id="c-mild"   label="Mild interference (nudge)"  width={420} height={888}><Frame><CompassInterferenceMild/></Frame></DCArtboard>
+        <DCArtboard id="c-severe" label="Severe interference (block)" width={420} height={888}><Frame><CompassInterferenceSevere/></Frame></DCArtboard>
+        <DCArtboard id="c-locked" label="Using pre-set direction"    width={420} height={888}><Frame><CompassLocked/></Frame></DCArtboard>
+      </DCSection>
+
+      <DCSection id="ar" title="AR view · Camera pose & sweep" subtitle="AR demands the phone point AT the wall, not at the floor. The sweep arrow guides users to the Kaaba.">
+        <DCArtboard id="ar-pose"     label="Phone too flat (blocks)"  width={420} height={888}><Frame><ArPoseHint/></Frame></DCArtboard>
+        <DCArtboard id="ar-search"   label="Searching · sweep right"  width={420} height={888}><Frame><ArSearching/></Frame></DCArtboard>
+        <DCArtboard id="ar-aligned"  label="Aligned on Kaaba ±5°"     width={420} height={888}><Frame><ArAligned/></Frame></DCArtboard>
+        <DCArtboard id="ar-interf"   label="Magnetic interference"    width={420} height={888}><Frame><ArInterference/></Frame></DCArtboard>
+        <DCArtboard id="ar-locked"   label="Pre-set · gyro lock"      width={420} height={888}><Frame><ArLocked/></Frame></DCArtboard>
+      </DCSection>
+
+      <DCSection id="flow" title="Pre-set direction · 3-step flow" subtitle="The safety net for places with no GPS or strong magnetic interference. Saved once at home; works anywhere later.">
+        <DCArtboard id="lock-1" label="Step 1 · Why pre-set"        width={420} height={888}><Frame><LockStep1/></Frame></DCArtboard>
+        <DCArtboard id="lock-2" label="Step 2 · Choose method"     width={420} height={888}><Frame><LockStep2/></Frame></DCArtboard>
+        <DCArtboard id="lock-3" label="Step 3 · Saved confirmation" width={420} height={888}><Frame><LockStep3/></Frame></DCArtboard>
+      </DCSection>
+
+      <DCSection id="calib" title="Calibration coachmark" subtitle="Reachable from the Calibrate tab or from any accuracy warning.">
+        <DCArtboard id="calib-1" label="Figure-8 in progress" width={420} height={888}><Frame><CalibrationScreen/></Frame></DCArtboard>
+      </DCSection>
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

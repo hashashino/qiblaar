@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/arFragment">
+
+    <fragment
+        android:id="@+id/arFragment"
+        android:name="com.hashashino.qiblaar.ui.ar.ArFragment"
+        android:label="@string/nav_ar" />
+
+    <fragment
+        android:id="@+id/compassFragment"
+        android:name="com.hashashino.qiblaar.ui.compass.CompassFragment"
+        android:label="@string/nav_compass" />
+
+    <fragment
+        android:id="@+id/calibrationFragment"
+        android:name="com.hashashino.qiblaar.ui.calibration.CalibrationFragment"
+        android:label="@string/nav_calibrate" />
+</navigation>

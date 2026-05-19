@@ -1,0 +1,662 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_dark">
+
+    <!-- ──────────────────────────────────────── -->
+    <!-- Header row: eyebrow + city / accuracy chip -->
+    <!-- ──────────────────────────────────────── -->
+    <LinearLayout
+        android:id="@+id/ll_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_eyebrow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/qibla_compass_eyebrow"
+                android:textColor="@color/text_4"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.06"
+                android:textAllCaps="true" />
+
+            <TextView
+                android:id="@+id/tv_location_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/locating_label"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Accuracy chip (green / amber / red pill) -->
+        <TextView
+            android:id="@+id/tv_accuracy_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.01"
+            android:background="@drawable/bg_chip_neutral"
+            android:text="…" />
+    </LinearLayout>
+
+    <!-- ──────────────────────────────────────── -->
+    <!-- Scrollable body -->
+    <!-- ──────────────────────────────────────── -->
+    <ScrollView
+        android:id="@+id/scroll_body"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        app:layout_constraintTop_toBottomOf="@id/ll_header"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="24dp">
+
+            <!-- ── POSE HINT (replaces compass when pose invalid) ── -->
+            <LinearLayout
+                android:id="@+id/ll_pose_hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:visibility="gone">
+
+                <com.hashashino.qiblaar.views.PhoneOrientationHintView
+                    android:id="@+id/phone_tilt_hint_compass"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    app:orientationMode="flat" />
+
+                <TextView
+                    android:id="@+id/tv_pose_hint_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    android:text="@string/pose_hint_flat_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="22sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="-0.01"
+                    android:gravity="center" />
+
+                <TextView
+                    android:id="@+id/tv_pose_hint_body"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/pose_hint_flat_body"
+                    android:textColor="@color/text_2"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.55"
+                    android:gravity="center" />
+
+                <!-- Live tilt card -->
+                <LinearLayout
+                    android:id="@+id/ll_tilt_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="14dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:background="@drawable/bg_card_neutral">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_warn"
+                        android:tint="@color/amber"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/tv_tilt_degrees"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/text_2"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:text="Tilted 0° — needs to be under 15°" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ── FINDING LOCATION ── -->
+            <LinearLayout
+                android:id="@+id/ll_finding_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="24dp"
+                android:visibility="gone">
+
+                <com.hashashino.qiblaar.views.CompassView
+                    android:id="@+id/compass_view_finding"
+                    android:layout_width="260dp"
+                    android:layout_height="260dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:text="@string/finding_location_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:gravity="center" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/finding_location_body"
+                    android:textColor="@color/text_3"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:gravity="center" />
+            </LinearLayout>
+
+            <!-- ── SEVERE INTERFERENCE ── -->
+            <LinearLayout
+                android:id="@+id/ll_interference_severe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="14dp"
+                android:visibility="gone">
+
+                <!-- Blurred disk container (dimmed + blurred via alpha only in XML; blur via code) -->
+                <FrameLayout
+                    android:layout_width="260dp"
+                    android:layout_height="260dp">
+
+                    <com.hashashino.qiblaar.views.CompassView
+                        android:id="@+id/compass_view_severe"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <FrameLayout
+                        android:layout_width="84dp"
+                        android:layout_height="84dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_circle_red_soft">
+
+                        <ImageView
+                            android:layout_width="40dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_x"
+                            android:tint="@color/red_text"
+                            android:importantForAccessibility="no" />
+                    </FrameLayout>
+                </FrameLayout>
+
+                <!-- Severe warning card -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@drawable/bg_card_red">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/interference_severe_title"
+                        android:textColor="@color/red_text"
+                        android:textSize="15sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_severe_body"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text_2"
+                        android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.55" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- ── MAIN COMPASS (READY / MILD / LOCKED) ── -->
+            <LinearLayout
+                android:id="@+id/ll_compass_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:paddingTop="14dp"
+                android:visibility="gone">
+
+                <!-- Mild interference banner (shown above disk when mild) -->
+                <LinearLayout
+                    android:id="@+id/ll_mild_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="top"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_card_amber"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginTop="1dp"
+                        android:src="@drawable/ic_warn"
+                        android:tint="@color/amber"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/tv_mild_banner"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/text_2"
+                        android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.45" />
+                </LinearLayout>
+
+                <!-- Pre-set locked banner -->
+                <LinearLayout
+                    android:id="@+id/ll_locked_banner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:padding="12dp"
+                    android:background="@drawable/bg_card_green"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_lock"
+                        android:tint="@color/green"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:id="@+id/tv_locked_banner_body"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="10dp"
+                        android:textColor="@color/text_2"
+                        android:textSize="12sp"
+                        android:lineSpacingMultiplier="1.4" />
+
+                    <TextView
+                        android:id="@+id/tv_locked_age"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:textColor="@color/text_4"
+                        android:textSize="11sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <com.hashashino.qiblaar.views.CompassView
+                    android:id="@+id/compass_view"
+                    android:layout_width="282dp"
+                    android:layout_height="282dp" />
+
+                <!-- Bearing readout -->
+                <LinearLayout
+                    android:id="@+id/ll_bearing_readout"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="bottom">
+
+                        <TextView
+                            android:id="@+id/tv_bearing_big"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/text_primary"
+                            android:textSize="38sp"
+                            android:textStyle="bold"
+                            android:text="—°" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:layout_marginBottom="6dp"
+                            android:text="@string/true_north_label"
+                            android:textColor="@color/text_3"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <ImageView
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:src="@drawable/ic_kaaba"
+                            android:tint="@color/text_3"
+                            android:importantForAccessibility="no" />
+
+                        <TextView
+                            android:id="@+id/tv_distance"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:textColor="@color/text_3"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:text="— km away" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Signal trio (GPS · Compass · Magnetic) -->
+                <LinearLayout
+                    android:id="@+id/ll_signal_trio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:id="@+id/pill_gps"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="4dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_card_neutral">
+
+                        <TextView
+                            android:id="@+id/tv_gps_label"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/signal_gps"
+                            android:textColor="@color/text_3"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.06"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:id="@+id/tv_gps_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/green"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="…" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/pill_compass"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_card_neutral">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/signal_compass"
+                            android:textColor="@color/text_3"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.06"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:id="@+id/tv_compass_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/green"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="…" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/pill_magnetic"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="4dp"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:padding="10dp"
+                        android:background="@drawable/bg_card_neutral">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/signal_magnetic"
+                            android:textColor="@color/text_3"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.06"
+                            android:textAllCaps="true" />
+
+                        <TextView
+                            android:id="@+id/tv_magnetic_value"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textColor="@color/green"
+                            android:textSize="13sp"
+                            android:textStyle="bold"
+                            android:text="—" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Magnetic field detail row (shown during mild interference) -->
+                <LinearLayout
+                    android:id="@+id/ll_mag_detail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp"
+                    android:background="@drawable/bg_card_neutral"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:src="@drawable/ic_magnet"
+                        android:tint="@color/text_3"
+                        android:importantForAccessibility="no" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/magnetic_field_label"
+                        android:textColor="@color/text_3"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tv_mag_detail_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/amber_text"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Spacer -->
+            <Space android:layout_width="match_parent" android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- ── BOTTOM ACTION BUTTONS ── -->
+
+            <!-- Pre-set direction flow button (shown when ready/mild/locked) -->
+            <LinearLayout
+                android:id="@+id/ll_actions_main"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_preset_direction"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="@string/preset_direction"
+                    style="@style/Widget.QiblaAR.Button.Outlined"
+                    app:icon="@drawable/ic_lock"
+                    app:iconSize="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_recalibrate_icon"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:padding="0dp"
+                    style="@style/Widget.QiblaAR.Button.Quiet"
+                    app:icon="@drawable/ic_rotate_ccw"
+                    app:iconSize="18dp"
+                    app:iconGravity="textStart"
+                    android:contentDescription="@string/recalibrate_now"
+                    app:iconPadding="0dp" />
+            </LinearLayout>
+
+            <!-- Unlock + Re-anchor (when locked) -->
+            <LinearLayout
+                android:id="@+id/ll_actions_locked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_use_live_compass"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginBottom="8dp"
+                    android:text="@string/use_live_compass"
+                    style="@style/Widget.QiblaAR.Button.Quiet"
+                    app:icon="@drawable/ic_unlock"
+                    app:iconSize="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_re_anchor"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/re_anchor"
+                    style="@style/Widget.QiblaAR.Button.Outlined" />
+            </LinearLayout>
+
+            <!-- Recalibrate + Pre-set (when severe) -->
+            <LinearLayout
+                android:id="@+id/ll_actions_severe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_recalibrate_severe"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:text="@string/recalibrate_now"
+                    style="@style/Widget.QiblaAR.Button"
+                    app:icon="@drawable/ic_sparkle"
+                    app:iconSize="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_preset_severe"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/use_preset_instead"
+                    style="@style/Widget.QiblaAR.Button.Outlined" />
+            </LinearLayout>
+
+            <!-- Use pre-set link (when finding location) -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_use_preset_finding"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="@string/use_preset_instead"
+                style="@style/Widget.QiblaAR.Button.Borderless"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

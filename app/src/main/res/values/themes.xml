@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.QiblaAR" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green</item>
+        <item name="colorPrimaryVariant">@color/bg_surface</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">@color/bg_surface</item>
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:windowBackground">@color/background_dark</item>
+        <item name="android:statusBarColor">@color/background_dark</item>
+        <item name="android:navigationBarColor">@color/background_dark</item>
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+        <item name="materialButtonStyle">@style/Widget.QiblaAR.Button</item>
+        <item name="borderlessButtonStyle">@style/Widget.QiblaAR.Button.Borderless</item>
+    </style>
+
+    <!-- Primary filled button -->
+    <style name="Widget.QiblaAR.Button" parent="Widget.MaterialComponents.Button">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="backgroundTint">@color/green</item>
+        <item name="android:textColor">#042814</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="android:paddingStart">18dp</item>
+        <item name="android:paddingEnd">18dp</item>
+    </style>
+
+    <!-- Outlined/ghost button -->
+    <style name="Widget.QiblaAR.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeColor">@color/green_line</item>
+        <item name="android:textColor">@color/green</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">44dp</item>
+    </style>
+
+    <!-- Quiet/neutral button -->
+    <style name="Widget.QiblaAR.Button.Quiet" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">14sp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeColor">@color/hairline</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:minHeight">44dp</item>
+        <item name="backgroundTint">@color/bg_elevated</item>
+    </style>
+
+    <!-- Borderless/link button -->
+    <style name="Widget.QiblaAR.Button.Borderless" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:fontFamily">@font/plus_jakarta_sans</item>
+        <item name="fontFamily">@font/plus_jakarta_sans</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_3</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+</resources>
