@@ -408,13 +408,6 @@ class CompassFragment : Fragment() {
             }
         }
 
-        binding.btnReAnchor.setOnClickListener {
-            orientationManager.unlock()
-            QiblaLockHolder.unlock()
-            lockAgeJob?.cancel()
-            saveDirectionNow()
-        }
-
         binding.btnRecalibrateIcon.setOnClickListener { navigateToCalibrate() }
         binding.btnRecalibrateSevere.setOnClickListener { navigateToCalibrate() }
     }

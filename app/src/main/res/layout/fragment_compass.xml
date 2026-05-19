@@ -605,18 +605,10 @@
                     android:id="@+id/btn_use_live_compass"
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
-                    android:layout_marginBottom="8dp"
                     android:text="@string/use_live_compass"
                     style="@style/Widget.QiblaAR.Button.Quiet"
                     app:icon="@drawable/ic_unlock"
                     app:iconSize="16dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_re_anchor"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:text="@string/re_anchor"
-                    style="@style/Widget.QiblaAR.Button.Outlined" />
             </LinearLayout>
 
             <!-- Recalibrate + Pre-set (when severe) -->
