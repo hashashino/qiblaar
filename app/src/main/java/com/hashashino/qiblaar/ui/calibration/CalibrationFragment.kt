@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.hashashino.qiblaar.MainActivity
 import com.hashashino.qiblaar.R
 import com.hashashino.qiblaar.databinding.FragmentCalibrationBinding
 import com.hashashino.qiblaar.sensor.CompassAccuracy
@@ -24,6 +26,9 @@ class CalibrationFragment : Fragment() {
 
     private lateinit var orientationManager: OrientationManager
 
+    /** True when this screen was opened as the mandatory first-launch calibration. */
+    private var forcedFirstLaunch = false
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
@@ -35,8 +40,29 @@ class CalibrationFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         orientationManager = OrientationManager(requireContext(), DevicePose.FLAT)
 
+        val activity = requireActivity() as MainActivity
+        forcedFirstLaunch = !activity.isCalibrated()
+
+        // During the mandatory first-launch calibration there is nothing valid to go
+        // back to (the bottom nav is hidden), so send the app to the background instead
+        // of popping to an empty AR screen.
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(forcedFirstLaunch) {
+                override fun handleOnBackPressed() {
+                    requireActivity().moveTaskToBack(true)
+                }
+            }
+        )
+
         binding.btnDone.setOnClickListener {
-            findNavController().navigateUp()
+            if (forcedFirstLaunch) {
+                activity.markCalibrated()
+                activity.setBottomNavVisible(true)
+                findNavController().popBackStack(R.id.arFragment, false)
+            } else {
+                findNavController().navigateUp()
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launch {
